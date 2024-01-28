@@ -31,13 +31,22 @@ class ProtocolState(ABC):
     # override it.
 
     # pylint: disable=missing-function-docstring
-    def handle_chat_packet(self, packet: packets.Chat):
+    def handle_ok_packet(self, sender: GameProtocol, packet: packets.Ok):
         self._log_unregistered_packet(packet)
-    def handle_login_packet(self, packet: packets.Login):
+    def handle_deny_packet(self, sender: GameProtocol, packet: packets.Deny):
         self._log_unregistered_packet(packet)
-    def handle_register_packet(self, packet: packets.Register):
+    def handle_chat_packet(self, sender: GameProtocol, packet: packets.Chat):
         self._log_unregistered_packet(packet)
-
+    def handle_hello_packet(self, sender: GameProtocol, packet: packets.Hello):
+        self._log_unregistered_packet(packet)
+    def handle_login_packet(self, sender: GameProtocol, packet: packets.Login):
+        self._log_unregistered_packet(packet)
+    def handle_logout_packet(self, sender: GameProtocol, packet: packets.Logout):
+        self._log_unregistered_packet(packet)
+    def handle_move_packet(self, sender: GameProtocol, packet: packets.Move):
+        self._log_unregistered_packet(packet)
+    def handle_register_packet(self, sender: GameProtocol, packet: packets.Register):
+        self._log_unregistered_packet(packet)
     # pylint: enable=missing-function-docstring
 
     def __str__(self):

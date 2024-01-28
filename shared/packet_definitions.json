@@ -26,6 +26,16 @@
             "required": ["message"],
             "additionalProperties": false
         },
+        "Hello": {
+            "type": "object",
+            "properties": {
+                "username": {"type": "string"},
+                "x": {"type": "number"},
+                "y": {"type": "number"}
+            },
+            "required": ["username"],
+            "additionalProperties": false
+        },
         "Login": {
             "type": "object",
             "properties": {
@@ -55,10 +65,11 @@
         "Move": {
             "type": "object",
             "properties": {
+                "username": {"type": "string"},
                 "x": {"type": "number"},
                 "y": {"type": "number"}
             },
-            "required": ["x", "y"],
+            "required": ["username"],
             "additionalProperties": false
         }
     },
@@ -67,6 +78,7 @@
         "Ok": {"$ref": "#/definitions/Ok"},
         "Deny": {"$ref": "#/definitions/Deny"},
         "Chat": {"$ref": "#/definitions/Chat"},
+        "Hello": {"$ref": "#/definitions/Hello"},
         "Login": {"$ref": "#/definitions/Login"},
         "Logout": {"$ref": "#/definitions/Logout"},
         "Register": {"$ref": "#/definitions/Register"},

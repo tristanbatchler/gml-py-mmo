@@ -9,7 +9,7 @@ if (input_string != "" and keyboard_check_pressed(vk_enter)) {
 			var _username = _array[1];
 			var _password = _array[2];
 			obj_network_client.send_login(_username, _password);
-			my_username = _username;
+			obj_player.username = _username;
 		}
 	}
 	
@@ -31,13 +31,14 @@ if (input_string != "" and keyboard_check_pressed(vk_enter)) {
 		if (array_length(_array) != 1) {
 			add_to_log("Usage: /logout", c_yellow);
 		} else {
-			obj_network_client.send_logout(my_username);
+			obj_network_client.send_logout(obj_player.username);
+			obj_player.state = player_state_logging_out;
 		}
 	}
 	
 	// Chat
 	else {
-		obj_network_client.send_chat(my_username, input_string);
+		obj_network_client.send_chat(obj_player.username, input_string);
 	}
 	
 	input_string = ""

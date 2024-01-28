@@ -51,3 +51,16 @@ send_register = function(_username, _password) {
 	var _message_length = buffer_tell(write_buffer);
 	network_send_raw(socket, write_buffer, _message_length);
 }
+
+send_move = function(_username, _x=0, _y=0) {
+	buffer_seek(write_buffer, buffer_seek_start, 0);
+	SnapBufferWriteMessagePack(write_buffer, {
+		Move: {
+			username: _username,
+			x: _x,
+			y: _y
+		}
+	});
+	var _message_length = buffer_tell(write_buffer);
+	network_send_raw(socket, write_buffer, _message_length);
+}

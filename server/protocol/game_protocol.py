@@ -18,7 +18,8 @@ class GameProtocol:
     def __init__(self, server_stream: WebSocketConnection, 
                  connected_protocols: list[GameProtocol], ident: int) -> None:
         self._server_connection: WebSocketConnection = server_stream
-        self._outgoing_packets: Queue[tuple[GameProtocol, packets.BaseModel]] = Queue()
+        self._outgoing_packets: \
+            Queue[tuple[GameProtocol, GameProtocol, packets.BaseModel]] = Queue()
         self.state: states.ProtocolState = states.EntryState(self)
         self._other_protocols: list[GameProtocol] = connected_protocols
         self._ident: int = ident
@@ -76,11 +77,14 @@ class GameProtocol:
         self.state = new_state
         self.logger.extra['state'] = new_state
 
-    def queue_outbound_packet(self, recipient: GameProtocol, packet: packets.BaseModel) -> None:
+    def queue_outbound_packet(self, sender: GameProtocol, recipient: GameProtocol, 
+                              packet: packets.BaseModel) -> None:
         """
         Queues up a packet to send to another protocol on the next tick.
 
         Args:
+            sender (GameProtocol): 
+                The protocol that is sending the packet.
             recipient (GameProtocol): 
                 The protocol to send the packet to. If this is the same as this protocol, the packet 
                 will be sent directly to the connected client.
@@ -90,7 +94,7 @@ class GameProtocol:
         Returns:
             None
         """
-        self._outgoing_packets.put((recipient, packet))
+        self._outgoing_packets.put((sender, recipient, packet))
 
     def broadcast_packet(self, packet: packets.BaseModel, include_self: bool = False, 
                      states_whitelist=None) -> None:
@@ -118,7 +122,7 @@ class GameProtocol:
 
         for recipient in self._other_protocols:
             if _is_recipient_eligible(recipient):
-                recipient.queue_outbound_packet(recipient, packet)
+                recipient.queue_outbound_packet(self, recipient, packet)
 
 
     async def tick(self) -> None:
@@ -128,14 +132,16 @@ class GameProtocol:
         if self._outgoing_packets.empty():
             return
 
-        recipient, packet = self._outgoing_packets.get()
-        if recipient == self:
+        sender, recipient, packet = self._outgoing_packets.get()
+        if sender is self and recipient is self:
             await self._send_packet(packet)
+        elif recipient is self:
+            self._handle_packet(sender, packet)
         else:
-            recipient.queue_outbound_packet(recipient, packet)
+            recipient.queue_outbound_packet(sender, recipient, packet)
 
     async def _send_packet(self, packet: packets.BaseModel) -> None:
-        self.logger.info(f"Sending packet: {packet}")
+        self.logger.info(f"Sending packet: {packet.__class__.__name__}: ({packet})")
         await self._send_message(serialize_packet(packet))
 
     async def _read_message(self) -> Optional[bytes]:
@@ -162,6 +168,9 @@ class GameProtocol:
     def _handle_message(self, data: bytes) -> None:
         packet: packets.BaseModel = packet_from_bytes(data)
         
+        self._handle_packet(self, packet)
+
+    def _handle_packet(self, sender: GameProtocol, packet: packets.BaseModel) -> None:
         packet_name: str = packet.__class__.__name__.lower()
         handler_name: str = f"handle_{packet_name}_packet"
 
@@ -172,6 +181,6 @@ class GameProtocol:
             return
 
         try:
-            handler(packet)
+            handler(sender, packet)
         except TypeError as exc:
             self.logger.warning(f"State {self.state} does not implement {handler_name}, {exc}")
