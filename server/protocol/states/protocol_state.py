@@ -22,7 +22,8 @@ class ProtocolState(ABC):
         self.proto = protocol
 
     def _log_unregistered_packet(self, packet: packets.BaseModel):
-        self.proto.logger.warning(f"Received {packet.name} packet in unregistered state")
+        self.proto.logger.warning(f"Received {packet.__class__.__name__} packet in unregistered \
+                                  state")
         d: packets.Deny = deny("You cannot perform this action")
         self.proto.queue_outbound_packet(self.proto, d)
 

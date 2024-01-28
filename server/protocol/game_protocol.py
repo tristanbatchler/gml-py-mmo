@@ -6,10 +6,12 @@ import logging
 from queue import Queue
 from typing import Optional
 from trio_websocket import WebSocketConnection, ConnectionClosed
+from trio import current_time
 from server.protocol import states
 from server.protocol.logging_adapter import ProtocolLoggerAdapter
 import server.net.packets as packets
 from server.net import serialize_packet, packet_from_bytes
+import random
 
 class GameProtocol:
     """
@@ -24,7 +26,13 @@ class GameProtocol:
         self._other_protocols: list[GameProtocol] = connected_protocols
         self._ident: int = ident
 
-        self.username: Optional[str] = None
+        self.username: str = "Anonymous"
+        self._x: float = random.uniform(10, 310)
+        self._y: float = random.uniform(10, 230)
+        self._input_x: float = 0.0
+        self._input_y: float = 0.0
+        self._speed: float = 380
+        self._delta_time: float = 1/20
 
         # Give this protocol a unique identifier to improve logging
         self.logger = ProtocolLoggerAdapter(logging.getLogger(__name__), {
@@ -129,6 +137,8 @@ class GameProtocol:
         """
         Sends the packet at the front of the outgoing packet queue to its destination.
         """
+        self.update_position()
+
         if self._outgoing_packets.empty():
             return
 
@@ -139,6 +149,14 @@ class GameProtocol:
             self._handle_packet(sender, packet)
         else:
             recipient.queue_outbound_packet(sender, recipient, packet)
+        
+    def update_input(self, x: float, y: float) -> None:
+        self._input_x = x
+        self._input_y = y
+
+    def update_position(self) -> None:
+        self._x += self._speed * self._input_x * self._delta_time
+        self._y += self._speed * self._input_y * self._delta_time
 
     async def _send_packet(self, packet: packets.BaseModel) -> None:
         self.logger.info(f"Sending packet: {packet.__class__.__name__}: ({packet})")

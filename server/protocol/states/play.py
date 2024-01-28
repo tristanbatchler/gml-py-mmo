@@ -18,8 +18,11 @@ class PlayState(ProtocolState):
     This state handles packets that are sent/received after the player has logged in.
     """
     def handle_chat_packet(self, sender: GameProtocol, packet: packets.Chat) -> None:
-        self.proto.broadcast_packet(packet, include_self=True, 
-                                    states_whitelist=[states.PlayState])
+        if sender is self.proto:
+            self.proto.broadcast_packet(packet, include_self=True, 
+                                        states_whitelist=[states.PlayState])
+        else:
+            self.proto.queue_outbound_packet(self.proto, self.proto, packet)
 
     def handle_logout_packet(self, sender: GameProtocol, packet: packets.Logout) -> None:
         if self.proto.username == packet.username:
@@ -37,12 +40,14 @@ class PlayState(ProtocolState):
         self.proto.queue_outbound_packet(self.proto, self.proto, packet)
 
         if sender is not self.proto:
-            h: packets.Hello = packets.Hello(username=self.proto.username, x=85, y=85)
-            sender.queue_outbound_packet(self.proto, sender, h)
+            h: packets.Hello = packets.Hello(username=self.proto.username, 
+                                             x=self.proto._x, y=self.proto._y)
+            sender.queue_outbound_packet(sender, sender, h)
         
 
     def handle_move_packet(self, sender: GameProtocol, packet: packets.Move) -> None:
-        if packet.username == self.proto.username:
+        if sender is self.proto:
+            self.proto.update_input(packet.x, packet.y)
             self.proto.broadcast_packet(packet, states_whitelist=[states.PlayState])
         else:
-            self.proto.queue_outbound_packet(sender, self.proto, packet)
+            self.proto.queue_outbound_packet(self.proto, self.proto, packet)
