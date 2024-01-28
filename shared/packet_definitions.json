@@ -1,0 +1,76 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "Ok": {
+            "type": "object",
+            "properties": {
+                "message": {"type": "string"}
+            },
+            "required": [],
+            "additionalProperties": false
+        },
+        "Deny": {
+            "type": "object",
+            "properties": {
+                "reason": {"type": "string"}
+            },
+            "required": [],
+            "additionalProperties": false
+        },
+        "Chat": {
+            "type": "object",
+            "properties": {
+                "sender": {"type": "string"}, 
+                "message": {"type": "string"}
+            },
+            "required": ["message"],
+            "additionalProperties": false
+        },
+        "Login": {
+            "type": "object",
+            "properties": {
+                "username": {"type": "string"},
+                "password": {"type": "string"}
+            },
+            "required": ["username", "password"],
+            "additionalProperties": false
+        },
+        "Logout": {
+            "type": "object",
+            "properties": {
+                "username": {"type": "string"}
+            },
+            "required": ["username"],
+            "additionalProperties": false
+        },
+        "Register": {
+            "type": "object",
+            "properties": {
+                "username": {"type": "string"},
+                "password": {"type": "string"}
+            },
+            "required": ["username", "password"],
+            "additionalProperties": false
+        },
+        "Move": {
+            "type": "object",
+            "properties": {
+                "x": {"type": "number"},
+                "y": {"type": "number"}
+            },
+            "required": ["x", "y"],
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "properties": {
+        "Ok": {"$ref": "#/definitions/Ok"},
+        "Deny": {"$ref": "#/definitions/Deny"},
+        "Chat": {"$ref": "#/definitions/Chat"},
+        "Login": {"$ref": "#/definitions/Login"},
+        "Logout": {"$ref": "#/definitions/Logout"},
+        "Register": {"$ref": "#/definitions/Register"},
+        "Move": {"$ref": "#/definitions/Move"}
+    },
+    "additionalProperties": false
+}

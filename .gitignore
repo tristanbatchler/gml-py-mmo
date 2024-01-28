@@ -1,0 +1,5 @@
+client/scripts/Snap*/**
+client/scripts/__SnapSystem
+server/venv/**
+client/options/**
+**/__pycache__/**

@@ -1,0 +1,4 @@
+trio-websocket
+msgpack
+jsonschema
+datamodel-code-generator
