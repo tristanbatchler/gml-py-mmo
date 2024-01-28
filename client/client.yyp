@@ -121,6 +121,7 @@
     {"id":{"name":"register_singleton","path":"scripts/register_singleton/register_singleton.yy",},},
     {"id":{"name":"spr_other","path":"sprites/spr_other/spr_other.yy",},},
     {"id":{"name":"SnapForeach","path":"scripts/SnapForeach/SnapForeach.yy",},},
+    {"id":{"name":"chatbox_helpers","path":"scripts/chatbox_helpers/chatbox_helpers.yy",},},
     {"id":{"name":"SnapBufferReadTilemapNew","path":"scripts/SnapBufferReadTilemapNew/SnapBufferReadTilemapNew.yy",},},
     {"id":{"name":"SnapFromYAML","path":"scripts/SnapFromYAML/SnapFromYAML.yy",},},
     {"id":{"name":"SnapBufferReadJSON","path":"scripts/SnapBufferReadJSON/SnapBufferReadJSON.yy",},},

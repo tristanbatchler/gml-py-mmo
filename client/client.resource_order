@@ -87,6 +87,7 @@
     {"name":"SnapBufferWriteGML","order":1,"path":"scripts/SnapBufferWriteGML/SnapBufferWriteGML.yy",},
     {"name":"spr_other","order":1,"path":"sprites/spr_other/spr_other.yy",},
     {"name":"SnapForeach","order":7,"path":"scripts/SnapForeach/SnapForeach.yy",},
+    {"name":"chatbox_helpers","order":4,"path":"scripts/chatbox_helpers/chatbox_helpers.yy",},
     {"name":"SnapBufferReadTilemapNew","order":3,"path":"scripts/SnapBufferReadTilemapNew/SnapBufferReadTilemapNew.yy",},
     {"name":"SnapFromYAML","order":2,"path":"scripts/SnapFromYAML/SnapFromYAML.yy",},
   ],

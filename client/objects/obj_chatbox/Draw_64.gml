@@ -13,4 +13,10 @@ for (var _i = 0; _i < _num_to_show; _i++) {
 }
 
 draw_rectangle(10, _vph - 10 - _padding, _vpw - 10, _vph - 10, true);
-draw_text(10 + 3, _vph - 10 - _padding + 3, input_string);
+
+var _prompt = keyboard_buffer;
+if (blink) {
+	_prompt += "|";
+}
+
+draw_text(10 + 3, _vph - 10 - _padding + 3, _prompt);
