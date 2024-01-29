@@ -2,7 +2,12 @@ var _data_type = async_load[? "type"];
 
 switch (_data_type) {
 	case network_type_non_blocking_connect:
-		obj_chatbox.add_to_log("Connection established!", c_lime);
+		var _succeeded = async_load[? "succeeded"];
+		if (_succeeded) {
+			obj_chatbox.add_to_log("Connection established!", c_lime);
+		} else {
+			obj_chatbox.add_to_log("Connection failed", c_yellow);	
+		}
 		break;
 		
 	case network_type_data:
