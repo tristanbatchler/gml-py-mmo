@@ -1,20 +1,21 @@
-if (state != player_state_play) {
-	return;	
+var _dx = 0;
+var _dy = 0;
+
+if (keyboard_check_released(vk_right)) {
+	_dx = obj_room_manager.xgrid_size;
+} else if (keyboard_check_released(vk_left)) {
+	_dx = -obj_room_manager.xgrid_size;	
+} else if (keyboard_check_released(vk_down)) {
+	_dy = obj_room_manager.xgrid_size;	
+} else if (keyboard_check_released(vk_up)) {
+	_dy = -obj_room_manager.xgrid_size;	
 }
 
-var _x_input = keyboard_check(vk_right) - keyboard_check(vk_left);
-var _y_input = keyboard_check(vk_down) - keyboard_check(vk_up);
-
-x += _x_input * move_speed;
-y += _y_input * move_speed;
-
-if (_x_input != prev_x_input and _y_input != prev_y_input) {
-	obj_network_client.send_move(username, _x_input, _y_input);	
-} else if (_x_input != prev_x_input) {
-	obj_network_client.send_move(username, _x_input);
-} else if (_y_input != prev_y_input) {
-	obj_network_client.send_move(username,         , _y_input);
+if (_dx != 0 || _dy != 0) {
+	obj_network_client.send_packet({
+		move: {
+			dx: _dx,
+			dy: _dy
+		}
+	});	
 }
-
-prev_x_input = _x_input;
-prev_y_input = _y_input;

@@ -1,67 +1,59 @@
-"""
-This is the main entrypoint for the server. It creates a trio server that listens for websocket 
-connections. Each connection is handled by a GameProtocol instance.
-"""
+import asyncio
 import logging
-import trio
-from trio_websocket import serve_websocket, WebSocketConnection, WebSocketRequest  # type: ignore
-from server.protocol import GameProtocol
+import traceback
+from netbound.app import ServerApp
+from server.state import EntryState
+from server import packet
+from server.database import model
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from ssl import SSLContext, PROTOCOL_TLS_SERVER
 
-class GameServer:
-    """
-    Represents a websocket server that handles new connections for the game.
-    """
-    def __init__(self, tick_rate: float) -> None:
-        self._connected_protocols: list[GameProtocol] = []
-        self._num_protocols_connected: int = 0
-        self._tick_rate: float = tick_rate
+def get_ssl_context(certpath: str, keypath: str) -> SSLContext:
+    logging.info("Loading encryption key")
+    ssl_context: SSLContext = SSLContext(PROTOCOL_TLS_SERVER)
+    try:
+        ssl_context.load_cert_chain(certpath, keypath)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"No encryption key or certificate found. Please generate a pair and save them to {certpath} and {keypath}")
 
-    async def handle_connection(self, request: WebSocketRequest):
-        """
-        Handles a new websocket connection. This function is called by the trio server whenever a 
-        new connection is made. This function creates a new GameProtocol instance for the connection 
-        and starts it.
-        """
-        logging.info("New connection")
-        self._num_protocols_connected += 1
-        connection: WebSocketConnection = await request.accept()
-        proto: GameProtocol = GameProtocol(connection, self._connected_protocols, 
-                                           self._num_protocols_connected)
-        self._connected_protocols.append(proto)
-        await proto.start()
-
-    async def tick(self) -> None:
-        """
-        Tells each connected protocol to tick.
-        """
-        for protocol in self._connected_protocols:
-            await protocol.tick()
-
-    async def run(self) -> None:
-        """
-        Runs the game server. This function starts the tick loop.
-        """
-        while True:
-            start_time: float = trio.current_time()
-            await self.tick()
-            elapsed: float = trio.current_time() - start_time
-            diff: float = self._tick_rate - elapsed
-            if diff > 0:
-                await trio.sleep(diff)
-            elif diff < 0:
-                logging.warning("Tick time budget exceeded by %s seconds", -diff)
-
+    return ssl_context
 
 async def main() -> None:
-    """
-    Serves the websocket server and handles new connections.
-    """
-    server: GameServer = GameServer(1/20)
-    async with trio.open_nursery() as nursery:
-        nursery.start_soon(serve_websocket, server.handle_connection, 'localhost', 8081, None)
-        nursery.start_soon(server.run)
+    logging.info("Starting server")
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    logging.info("Server starting")
-    trio.run(main)
+    db_engine: AsyncEngine = create_async_engine("sqlite+aiosqlite:///server/database/database.sqlite3")
+    ssl_context: SSLContext = get_ssl_context("server/ssl/localhost.crt", "server/ssl/localhost.key")
+    server_app: ServerApp = ServerApp("localhost", 443, db_engine, ssl_context=ssl_context)
+
+    server_app.register_packets(packet)
+    server_app.register_db_models(model)
+
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(server_app.start(initial_state=EntryState))
+        tg.create_task(server_app.run(ticks_per_second=10))
+
+
+    logging.info("Server stopped")
+
+
+if __name__ == "__main__":
+
+    logging.basicConfig(level=logging.INFO)
+    
+    # Silence SQLAlchemy logging
+    sqlalchemy_engine_logger = logging.getLogger('sqlalchemy.engine')
+    sqlalchemy_engine_logger.setLevel(logging.WARNING)
+
+
+    # Set format for logging
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    for handler in logging.getLogger().handlers:
+        handler.setFormatter(formatter)
+
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info("Server stopped by user")
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+        traceback.print_exc() 

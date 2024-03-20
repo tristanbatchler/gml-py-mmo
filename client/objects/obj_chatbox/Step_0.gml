@@ -16,6 +16,7 @@ if (backspace_repeat and not alarm[1]) {
 
 if (keyboard_check_released(vk_backspace)) {
 	alarm[0] = -1;	
+	backspace_repeat = false;
 }
 
 if (keyboard_buffer != "" and keyboard_check_pressed(vk_enter)) {
