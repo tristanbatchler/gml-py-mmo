@@ -4,7 +4,6 @@ import traceback
 from netbound.app import ServerApp
 from server.state import EntryState
 from server import packet
-from server.database import model
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
 
@@ -26,7 +25,6 @@ async def main() -> None:
     server_app: ServerApp = ServerApp("localhost", 443, db_engine, ssl_context=ssl_context)
 
     server_app.register_packets(packet)
-    server_app.register_db_models(model)
 
     async with asyncio.TaskGroup() as tg:
         tg.create_task(server_app.start(initial_state=EntryState))

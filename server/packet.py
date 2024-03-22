@@ -1,4 +1,3 @@
-import json
 from typing import Any
 from netbound.packet import BasePacket
 
@@ -44,9 +43,3 @@ class DisconnectPacket(BasePacket):
 
 class ChatPacket(BasePacket):
     message: str
-
-class MalformedPacketError(ValueError):
-    pass
-
-class UnknownPacketError(ValueError):
-    pass

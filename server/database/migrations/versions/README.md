@@ -1,0 +1,1 @@
+The `versions` directory is where the Alembic migration scripts are stored.
