@@ -20,10 +20,20 @@ class EntryState(BaseState):
         self._last_failed_login_attempt: float = 0  # To rate limit login attempts
         self._usernames_already_logged_in: set[str] = set()  # To avoid double logins
 
-    async def on_transition(self, *args, **kwargs) -> None:
+    async def _on_transition(self, previous_state_view: BaseState.View | None = None) -> None:
         await self._queue_local_client_send(PIDPacket(from_pid=self._pid))
         now: dt = dt.now()
-        await self._queue_local_client_send(MotdPacket(from_pid=self._pid, message=f"Welcome! It is currently {now.strftime('%A, %B %d %I:%M %p')}--what a time to be alive!"))
+
+        message: str = "Welcome"
+        if previous_state_view:
+            message += " back"
+            try:
+                message += f", {previous_state_view.name}"
+            except AttributeError:
+                pass
+        message += f"! It is currently {now.strftime('%A, %B %d %I:%M %p')}--what a time to be alive!"
+
+        await self._queue_local_client_send(MotdPacket(from_pid=self._pid, message=message))
 
         # Send out a request for all currently logged in usernames (to avoid double logins)
         await self._queue_local_protos_send(WhichUsernamesPacket(from_pid=self._pid, to_pid=EVERYONE, exclude_sender=True))

@@ -1,10 +1,8 @@
 from __future__ import annotations
-import logging
 from netbound.state import BaseState
 from dataclasses import dataclass
 from server.packet import ChatPacket, DisconnectPacket, HelloPacket, MovePacket, MyUsernamePacket, WhichUsernamesPacket
 from netbound.constants import EVERYONE
-from typing import Optional
 from server.state import EntryState
 from netbound.state import TransitionError
 from server.database.model import User, Entity, InstancedEntity, Player
@@ -30,7 +28,7 @@ class LoggedState(BaseState):
         self._y: int = 0
         self._image_index: int = 0
     
-    async def on_transition(self, previous_state_view: Optional[BaseState.View]=None) -> None:
+    async def _on_transition(self, previous_state_view: BaseState.View | None = None) -> None:
         assert isinstance(previous_state_view, EntryState.View)
         if previous_state_view.username:
             self._name = previous_state_view.username

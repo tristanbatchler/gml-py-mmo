@@ -101,5 +101,10 @@ function handle_logout(_args) {
 			reason: "user logged out"
 		}
 	});
-	game_restart();
+	
+	with (obj_actor) {
+		instance_destroy(self);	
+	}
+	
+	ds_list_clear(obj_chatbox.log);
 }
