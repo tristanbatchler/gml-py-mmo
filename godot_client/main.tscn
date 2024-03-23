@@ -1,9 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://burqt8mt2g2m2"]
+[gd_scene load_steps=12 format=3 uid="uid://burqt8mt2g2m2"]
 
 [ext_resource type="Script" path="res://NetworkClient.gd" id="1_0swtu"]
 [ext_resource type="Script" path="res://Main.gd" id="1_jtfy4"]
 [ext_resource type="FontFile" uid="uid://80bd0v6adi1y" path="res://Kenney Pixel.ttf" id="3_c6ncg"]
-[ext_resource type="PackedScene" uid="uid://ii16i5jbj1hs" path="res://actor.tscn" id="3_iyd4m"]
 
 [sub_resource type="Image" id="Image_qp7sp"]
 data = {
@@ -163,9 +162,6 @@ selection_enabled = true
 [node name="LineEdit" type="LineEdit" parent="UI/MarginContainer/VBoxContainer"]
 layout_mode = 2
 caret_blink = true
-
-[node name="Actor" parent="." instance=ExtResource("3_iyd4m")]
-position = Vector2(74, 47)
 
 [connection signal="connected" from="NetworkClient" to="." method="_on_network_client_connected"]
 [connection signal="disconnected" from="NetworkClient" to="." method="_on_network_client_disconnected"]
