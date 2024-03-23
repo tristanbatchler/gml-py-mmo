@@ -63,7 +63,7 @@ func process_command(command: String, args: Array[String]):
 	elif command == "register":
 		do_register(args[0], args[1])
 	else:
-		_textbox.append_text("Command '%s' not found" % command)
+		_textbox.append_text("Command '%s' not found\n" % command)
 
 func _on_network_client_connected():
 	_textbox.append_text("Connection with the server established\n")
