@@ -1,11 +1,13 @@
 import asyncio
 import logging
 import traceback
+import argparse
 from netbound.app import ServerApp
 from server.state import EntryState
 from server import packet
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
+from ssl import TLSVersion
 
 def get_ssl_context(certpath: str, keypath: str) -> SSLContext:
     logging.info("Loading encryption key")
@@ -17,12 +19,19 @@ def get_ssl_context(certpath: str, keypath: str) -> SSLContext:
 
     return ssl_context
 
-async def main() -> None:
+async def main(hostname: str, port: int) -> None:
     logging.info("Starting server")
 
     db_engine: AsyncEngine = create_async_engine("sqlite+aiosqlite:///server/database/database.sqlite3")
-    ssl_context: SSLContext = get_ssl_context("server/ssl/localhost.crt", "server/ssl/localhost.key")
-    server_app: ServerApp = ServerApp("localhost", 443, db_engine, ssl_context=ssl_context)
+
+    # Generated with `mkcert -install` and `mkcert localhost 127.0.0.1 ::1` (need mkcert first)
+    ssl_context: SSLContext = get_ssl_context("server/ssl/localhost+2.pem", "server/ssl/localhost+2-key.pem")
+
+    # TLS 1.3 is not supported by Godot yet, so we need to force 1.2
+    ssl_context.minimum_version = TLSVersion.TLSv1_2
+    ssl_context.maximum_version = TLSVersion.TLSv1_2
+
+    server_app: ServerApp = ServerApp(hostname, port, db_engine, ssl_context=ssl_context)
 
     server_app.register_packets(packet)
 
@@ -48,8 +57,13 @@ if __name__ == "__main__":
     for handler in logging.getLogger().handlers:
         handler.setFormatter(formatter)
 
+    parser = argparse.ArgumentParser(description="Start the server")
+    parser.add_argument("--hostname", type=str, default="localhost", help="Hostname to bind to")
+    parser.add_argument("--port", type=int, default=8081, help="Port to bind to")
+    args = parser.parse_args()
+
     try:
-        asyncio.run(main())
+        asyncio.run(main(args.hostname, args.port))
     except KeyboardInterrupt:
         logging.info("Server stopped by user")
     except Exception as e:

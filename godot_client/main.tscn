@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3 uid="uid://burqt8mt2g2m2"]
+
+[ext_resource type="Script" path="res://NetworkClient.gd" id="1_0swtu"]
+[ext_resource type="Script" path="res://Main.gd" id="1_jtfy4"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_jtfy4")
+
+[node name="NetworkClient" type="Node" parent="."]
+script = ExtResource("1_0swtu")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/MarginContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="UI/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LineEdit" type="LineEdit" parent="UI/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+caret_blink = true
+
+[connection signal="connected" from="NetworkClient" to="." method="_on_network_client_connected"]
+[connection signal="disconnected" from="NetworkClient" to="." method="_on_network_client_disconnected"]
+[connection signal="error" from="NetworkClient" to="." method="_on_network_client_error"]
+[connection signal="received" from="NetworkClient" to="." method="_on_network_client_received"]
+[connection signal="text_submitted" from="UI/MarginContainer/VBoxContainer/LineEdit" to="." method="_on_line_edit_text_submitted"]
