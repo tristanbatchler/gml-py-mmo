@@ -21,6 +21,7 @@ pip install -r server/requirements.txt
     ```powershell
     cd server/ssl
     mkcert localhost 127.0.0.1 ::1
+    cd ../..
     ```
 
 ### Setup database

@@ -1,3 +1,5 @@
 # Godot 4+ specific ignores
 .godot/
 *.crt
+exports/
+export_presets.cfg
