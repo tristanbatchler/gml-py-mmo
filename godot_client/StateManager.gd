@@ -51,8 +51,17 @@ func state_play(p_type: String, p_data: Dictionary):
 		if from_pid != _pid and _pids_actors.has(from_pid):
 			var actor_moved: CharacterBody2D = _pids_actors[from_pid]
 			actor_moved.enqueue_input(delta_pos.normalized())
+			
+	if p_type == "Disconnect":
+		if _pids_actors.has(from_pid):
+			var actor_disconnected: CharacterBody2D = _pids_actors[from_pid]
+			UI.textbox.append_text("%s has disconnected due to %s" % [from_pid, p_data["reason"]])
+			actor_disconnected.queue_free()
 		
 func do_login(username: String, password: String):
+	if _state != state_entry:
+		UI.textbox.append_text("You can't login here\n")
+		return
 	_state = state_login
 	NetworkClient.send_packet({
 		"login": {
@@ -63,6 +72,9 @@ func do_login(username: String, password: String):
 	})
 	
 func do_register(username: String, password: String):
+	if _state != state_entry:
+		UI.textbox.append_text("You can't register here\n")
+		return
 	_state = state_register
 	NetworkClient.send_packet({
 		"register": {
@@ -71,12 +83,25 @@ func do_register(username: String, password: String):
 			"password": password
 		}
 	})
+	
+func do_logout():
+	if _state != state_play:
+		UI.textbox.append_text("You can't logout here\n")
+	_state = state_entry
+	NetworkClient.send_packet({
+		"disconnect": {
+			"from_pid": _pid,
+			"reason": "User logged out"
+		}
+	})
 		
 func process_command(command: String, args: Array[String]):
 	if command == "login":
 		do_login(args[0], args[1])
 	elif command == "register":
 		do_register(args[0], args[1])
+	elif command == "logout":
+		do_logout()
 	else:
 		UI.textbox.append_text("Command '%s' not found\n" % command)
 
