@@ -15,6 +15,12 @@ run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.2", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+UI="*res://ui.tscn"
+StateManager="*res://StateManager.gd"
+NetworkClient="*res://NetworkClient.gd"
+
 [display]
 
 window/size/viewport_width=320

@@ -8,7 +8,7 @@ known_others = {};
 state = state_entry;
 
 socket = network_create_socket(network_socket_ws);
-network_connect_raw_async(socket, "wss://localhost", 443);
+network_connect_raw_async(socket, "wss://localhost", 8081);
 
 write_buffer = buffer_create(16384, buffer_fixed, 1);
 

@@ -6,10 +6,28 @@ const EPS: float = 1.0
 const INPUT_QUEUE_MAX_SIZE = 4
 
 var input_queue: Array = []
-var next_pos = position
-@export var network_client: NetworkClient
 
-@onready var animation_player: AnimationPlayer = $Sprite2D/AnimationPlayer
+
+signal network_move(pid: String, dx: int, dy: int)
+
+@onready var animation_player := $Sprite2D/AnimationPlayer
+@onready var nameplate := $Label
+
+var pid: String
+var is_player
+var actor_name: String
+var next_pos: Vector2
+
+func _ready():
+	nameplate.text = actor_name
+
+func init(_pid: String, _position: Vector2, _name: String, _is_player: bool):
+	pid = _pid
+	next_pos = _position
+	position = next_pos
+	actor_name = _name
+	is_player = _is_player
+	return self
 	
 func enqueue_input(move_dir: Vector2) -> void:
 	# We don't want the queue to get too big or it feels unnatural
@@ -21,6 +39,8 @@ func enqueue_input(move_dir: Vector2) -> void:
 		
 
 func _input(event):
+	if not is_player:
+		return
 	var move_dir: Vector2 = Vector2.ZERO
 	if event.is_action_pressed("move_right"):
 		move_dir = Vector2.RIGHT
@@ -33,17 +53,8 @@ func _input(event):
 		
 	if move_dir != Vector2.ZERO:
 		enqueue_input(move_dir)
-		
-	#network_client.send_packet({
-		#"move": {
-			#"from_pid": null  # Need to figure out how to pass PID to player
-			#"dx": move_dir.x,
-			#"dy": move_dir.y
-		#}
-	#})
 	
 func get_next_input_direction():
-	var next_pos = position
 	if input_queue.size() <= 0:
 		return null
 	
@@ -53,7 +64,16 @@ func _physics_process(delta):
 	if next_pos == position:
 		var next_input_dir = get_next_input_direction()
 		if next_input_dir:
-			next_pos = position + next_input_dir * GRID
+			var delta_pos = next_input_dir * GRID
+			next_pos = position + delta_pos
+			
+			NetworkClient.send_packet({
+				"move": {
+					"from_pid": pid,
+					"dx": delta_pos.x,
+					"dy": delta_pos.y
+				}
+			})
 	
 	if next_pos != position:
 		velocity = (next_pos - position) * SPEED * delta
@@ -61,7 +81,7 @@ func _physics_process(delta):
 		if position.distance_squared_to(next_pos) < EPS:
 			position = next_pos
 			velocity = Vector2.ZERO
-			
+
 	move_and_slide()
 
 func _process(delta):
@@ -86,8 +106,6 @@ func _process(delta):
 		
 	animation_player.play(anim)
 
-		
-	
 	
 	
 	

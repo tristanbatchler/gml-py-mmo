@@ -1,12 +1,7 @@
-class_name NetworkClient
 extends Node
 
 const Msgpack = preload("res://Msgpack.gd")
-
-signal connected
-signal received(packet: Dictionary)
-signal disconnected(code: int, reason: String)
-signal error(code: int)
+static var EVERYONE: String = "AAAAAAAAAAAAAAAAAAAAAA=="
 
 var socket := WebSocketPeer.new()
 
@@ -17,9 +12,13 @@ func _ready() -> void:
 	#var cert: X509Certificate = X509Certificate.new()
 	#cert.load("res://rootCA.crt")
 	var tls_options: TLSOptions = TLSOptions.client()
-	if socket.connect_to_url("wss://%s:%d" % [hostname, port], tls_options) != OK:
-		push_error("Unable to connect")
+	var err: int = socket.connect_to_url("wss://%s:%d" % [hostname, port], tls_options)
+	if err:
+		printerr("Unable to connect")
 		set_process(false)
+		StateManager._on_network_client_error(err)
+	else:
+		StateManager._on_network_client_connected()
 	
 
 func _process(delta) -> void:
@@ -27,7 +26,9 @@ func _process(delta) -> void:
 
 	if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
 		while socket.get_available_packet_count():
-			received.emit(Msgpack.decode(socket.get_packet())["result"])
+			var packet: Dictionary = Msgpack.decode(socket.get_packet())["result"]
+			StateManager._on_network_client_received(packet)
+			print("Received packet %s" % packet)
 
 func send_packet(packet: Dictionary) -> void:
 	var data: PackedByteArray = Msgpack.encode(packet)["result"]
@@ -35,7 +36,7 @@ func send_packet(packet: Dictionary) -> void:
 	if err:
 		printerr("Error sending data. Error code: ", err)
 		set_process(false)
-		error.emit(err)
+		StateManager._on_network_client_error(err)
 		
 func _exit_tree():
 	socket.close()
