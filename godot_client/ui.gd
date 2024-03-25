@@ -1,17 +1,20 @@
-extends CanvasLayer
+class_name UserInterface
+extends Control
 
-@onready var textbox: RichTextLabel = $Control/MarginContainer/VBoxContainer/RichTextLabel
-@onready var inputbox: LineEdit = $Control/MarginContainer/VBoxContainer/LineEdit
+@onready var textbox: RichTextLabel = $TextureRect/MarginContainer/VBoxContainer/RichTextLabel
 
 const BLUE := "00FFFF"
 const YELLOW := "FFFF00"
 const WHITE := "FFFFFF"
 const GREEN := "00FF00"
+const BLACK := "000000"
 
-func add_to_log(message: String, color: String = WHITE):
+func _ready():
+	for message in StateManager.global_log:
+		textbox.append_text(message)
+
+func add_to_log(message: String, color: String = BLACK):
+	message = "[color=#%s]%s[/color]\n" % [color, message]
 	message = message.replace(" ", "    ")  # This font is cool, but its spaces are way too tiny!
-	textbox.append_text("[color=#%s]%s[/color]\n" % [color, message])
-
-func _on_line_edit_text_submitted(new_text):
-	StateManager._on_ui_text_submitted(new_text)
-	inputbox.clear()
+	StateManager.global_log.append(message)
+	textbox.append_text(message)

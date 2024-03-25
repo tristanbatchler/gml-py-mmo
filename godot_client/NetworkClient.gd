@@ -5,6 +5,11 @@ static var EVERYONE: String = "AAAAAAAAAAAAAAAAAAAAAA=="
 
 var socket := WebSocketPeer.new()
 
+signal server_connected()
+signal server_error(err: int)
+signal packet_received(p_type: String, p_data: Dictionary)
+signal packet_error(err: int)
+
 @export var hostname: String = "localhost"
 @export var port: int = 9091
 
@@ -16,9 +21,9 @@ func _ready() -> void:
 	if err:
 		printerr("Unable to connect")
 		set_process(false)
-		StateManager._on_network_client_error(err)
+		server_error.emit(err)
 	else:
-		StateManager._on_network_client_connected()
+		server_connected.emit()
 	
 
 func _process(delta) -> void:
@@ -27,7 +32,9 @@ func _process(delta) -> void:
 	if socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
 		while socket.get_available_packet_count():
 			var packet: Dictionary = Msgpack.decode(socket.get_packet())["result"]
-			StateManager._on_network_client_received(packet)
+			var p_type: String = packet.keys()[0]
+			var p_data: Dictionary = packet[p_type]
+			packet_received.emit(p_type, p_data)
 			print("Received packet %s" % packet)
 
 func send_packet(packet: Dictionary) -> void:
@@ -36,7 +43,7 @@ func send_packet(packet: Dictionary) -> void:
 	if err:
 		printerr("Error sending data. Error code: ", err)
 		set_process(false)
-		StateManager._on_network_client_error(err)
+		packet_error.emit(err)
 		
 func _exit_tree():
 	socket.close()

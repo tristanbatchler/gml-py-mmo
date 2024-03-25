@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://bvmcvyr0guiku"]
+
+[ext_resource type="Script" path="res://scenes/play.gd" id="1_444aq"]
+[ext_resource type="PackedScene" uid="uid://cvsvao0jkvfqg" path="res://ui.tscn" id="2_kid3j"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aagu7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h28fa"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dsuem"]
+
+[node name="Play" type="Node2D"]
+script = ExtResource("1_444aq")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" parent="CanvasLayer" instance=ExtResource("2_kid3j")]
+
+[node name="VBoxContainer" type="MarginContainer" parent="CanvasLayer/UI"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/UI/VBoxContainer"]
+custom_minimum_size = Vector2(0, 15)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_aagu7")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_h28fa")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_dsuem")
+flat = true
+caret_blink = true
+caret_force_displayed = true

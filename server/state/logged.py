@@ -61,6 +61,10 @@ class LoggedState(BaseState):
         await self._queue_local_protos_send(HelloPacket(from_pid=self._pid, to_pid=EVERYONE, state_view=self.view_dict))
 
     async def handle_chat(self, p: ChatPacket) -> None:
+        # Truncate the message if it's too long
+        if len(p.message) > 80:
+            p.message = p.message[:80]
+
         # If this came from our own client, forward it on
         if p.from_pid == self._pid:
             await self._queue_local_protos_send(ChatPacket(from_pid=self._pid, to_pid=p.to_pid, exclude_sender=True, message=p.message))

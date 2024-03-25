@@ -69,30 +69,39 @@ class EntryState(BaseState):
         async with self._get_db_session() as session:
             if (await session.execute(select(User).where(User.username == p.username))).scalar_one_or_none():
                 await self._queue_local_client_send(DenyPacket(from_pid=self._pid, reason="Username already taken"))
-            else:
-                salt = bcrypt.gensalt()
-                password_hash = bcrypt.hashpw(p.password.encode(), salt).decode()
-                user: User = User(username=p.username, password=password_hash)
-                self._logger.info(f"Registering new user {user}")
-                entity: Entity = Entity(name=p.username)
-                
-                session.add(user)
-                session.add(entity)
-                await session.commit()
+                return
 
-                room_width: int = 320
-                room_height: int = 240
-                grid_size: int = 16
-                random_x: int = grid_size * randint(1, room_width // grid_size - 1)
-                random_y: int = grid_size * randint(1, room_height // grid_size - 1)
-                instanced_entity: InstancedEntity = InstancedEntity(entity_id=entity.id, x=random_x, y=random_y)
-                
-                session.add(instanced_entity)
-                await session.commit()
+            if len(p.username) <= 0:
+                await self._queue_local_client_send(DenyPacket(from_pid=self._pid, reason="Username must not be empty"))
+                return
+            
+            if len(p.password) <= 0:
+                await self._queue_local_client_send(DenyPacket(from_pid=self._pid, reason="Password must not be empty"))
+                return
 
-                player: Player = Player(entity_id=entity.id, instanced_entity_id=instanced_entity.entity_id, user_id=user.id, image_index=randint(0, 17))
+            salt = bcrypt.gensalt()
+            password_hash = bcrypt.hashpw(p.password.encode(), salt).decode()
+            user: User = User(username=p.username, password=password_hash)
+            self._logger.info(f"Registering new user {user}")
+            entity: Entity = Entity(name=p.username)
+            
+            session.add(user)
+            session.add(entity)
+            await session.commit()
 
-                session.add(player)
-                await session.commit()
+            room_width: int = 320
+            room_height: int = 240
+            grid_size: int = 16
+            random_x: int = grid_size * randint(1, room_width // grid_size - 1)
+            random_y: int = grid_size * randint(1, room_height // grid_size - 1)
+            instanced_entity: InstancedEntity = InstancedEntity(entity_id=entity.id, x=random_x, y=random_y)
+            
+            session.add(instanced_entity)
+            await session.commit()
 
-                await self._queue_local_client_send(OkPacket(from_pid=self._pid))
+            player: Player = Player(entity_id=entity.id, instanced_entity_id=instanced_entity.entity_id, user_id=user.id, image_index=randint(0, 17))
+
+            session.add(player)
+            await session.commit()
+
+            await self._queue_local_client_send(OkPacket(from_pid=self._pid))

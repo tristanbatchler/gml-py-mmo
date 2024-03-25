@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://bjvb8hhignqcl"]
+
+[ext_resource type="Script" path="res://scenes/entry.gd" id="1_oukol"]
+[ext_resource type="PackedScene" uid="uid://cvsvao0jkvfqg" path="res://ui.tscn" id="2_j4cse"]
+
+[node name="Entry" type="Node2D"]
+script = ExtResource("1_oukol")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" parent="CanvasLayer" instance=ExtResource("2_j4cse")]
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/UI"]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 39.0
+grow_horizontal = 2
+theme_override_constants/margin_top = 60
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/UI/MarginContainer"]
+layout_mode = 2
+
+[node name="Username" type="HBoxContainer" parent="CanvasLayer/UI/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/MarginContainer/VBoxContainer/Username"]
+layout_mode = 2
+text = "Username"
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/UI/MarginContainer/VBoxContainer/Username"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Password" type="HBoxContainer" parent="CanvasLayer/UI/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/UI/MarginContainer/VBoxContainer/Password"]
+layout_mode = 2
+text = "Password"
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/UI/MarginContainer/VBoxContainer/Password"]
+layout_mode = 2
+size_flags_horizontal = 3
+secret = true
+
+[node name="Buttons" type="HBoxContainer" parent="CanvasLayer/UI/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Login" type="Button" parent="CanvasLayer/UI/MarginContainer/VBoxContainer/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Login"
+
+[node name="Register" type="Button" parent="CanvasLayer/UI/MarginContainer/VBoxContainer/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Register"
+
+[connection signal="pressed" from="CanvasLayer/UI/MarginContainer/VBoxContainer/Buttons/Login" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="CanvasLayer/UI/MarginContainer/VBoxContainer/Buttons/Register" to="." method="_on_register_pressed"]

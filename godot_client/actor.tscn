@@ -1,8 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://ii16i5jbj1hs"]
+[gd_scene load_steps=18 format=3 uid="uid://ii16i5jbj1hs"]
 
 [ext_resource type="Script" path="res://actor.gd" id="1_7oapk"]
 [ext_resource type="Texture2D" uid="uid://df14c4t7ued2l" path="res://spritesheets/oldwoman.png" id="2_0v3o6"]
 [ext_resource type="FontFile" uid="uid://80bd0v6adi1y" path="res://Kenney Pixel.ttf" id="3_de3ol"]
+[ext_resource type="Theme" uid="uid://b3c8j66drnf1g" path="res://ui_theme.tres" id="4_d0gk1"]
 
 [sub_resource type="Animation" id="Animation_nu7x0"]
 length = 0.001
@@ -206,10 +207,24 @@ position = Vector2(-0.5, 23)
 shape = SubResource("RectangleShape2D_0x138")
 disabled = true
 
-[node name="Label" type="Label" parent="."]
+[node name="Nameplate" type="Label" parent="."]
 offset_left = -59.0
 offset_top = 29.0
 offset_right = 59.0
 offset_bottom = 41.0
 theme = SubResource("Theme_p7s25")
 horizontal_alignment = 1
+
+[node name="ChatLabel" type="Label" parent="."]
+offset_left = -95.0
+offset_top = -28.0
+offset_right = 95.0
+offset_bottom = -22.0
+theme = ExtResource("4_d0gk1")
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+horizontal_alignment = 1
+
+[node name="Timer" type="Timer" parent="ChatLabel"]
+wait_time = 5.0
+one_shot = true

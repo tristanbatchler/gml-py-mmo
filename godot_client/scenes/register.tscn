@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://cubcoqhe5qgih"]
+
+[ext_resource type="Script" path="res://scenes/register.gd" id="1_iwqc8"]
+[ext_resource type="PackedScene" uid="uid://cvsvao0jkvfqg" path="res://ui.tscn" id="2_4d80t"]
+
+[node name="Register" type="Node2D"]
+script = ExtResource("1_iwqc8")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" parent="CanvasLayer" instance=ExtResource("2_4d80t")]

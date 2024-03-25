@@ -11,10 +11,11 @@ var input_queue: Array = []
 signal network_move(pid: String, dx: int, dy: int)
 
 @onready var animation_player := $Sprite2D/AnimationPlayer
-@onready var nameplate := $Label
+@onready var nameplate := $Nameplate
+@onready var chat_label := $ChatLabel
+@onready var chat_timer := $ChatLabel/Timer
 @onready var sprite := $Sprite2D
 
-var pid: String
 var is_player
 var actor_name: String
 var next_pos: Vector2
@@ -22,6 +23,7 @@ var image_index: int
 
 func _ready():
 	nameplate.text = actor_name
+	chat_timer.connect("timeout", _on_chat_timer_timeout)
 	
 	var tex: Texture2D
 	match image_index:
@@ -35,10 +37,11 @@ func _ready():
 			tex = preload("res://spritesheets/draconian.png")
 		_:
 			tex = preload("res://spritesheets/default.png")
+			
+	sprite.texture = tex
 	
 
-func init(_pid: String, _position: Vector2, _name: String, _image_index: int, _is_player: bool):
-	pid = _pid
+func init(_position: Vector2, _name: String, _image_index: int, _is_player: bool):
 	next_pos = _position
 	position = next_pos
 	actor_name = _name
@@ -84,13 +87,14 @@ func _physics_process(delta):
 			var delta_pos = next_input_dir * GRID
 			next_pos = position + delta_pos
 			
-			NetworkClient.send_packet({
-				"move": {
-					"from_pid": pid,
-					"dx": delta_pos.x,
-					"dy": delta_pos.y
-				}
-			})
+			if is_player:
+				NetworkClient.send_packet({
+					"move": {
+						"from_pid": StateManager.pid,
+						"dx": delta_pos.x,
+						"dy": delta_pos.y
+					}
+				})
 	
 	if next_pos != position:
 		velocity = (next_pos - position) * SPEED * delta
@@ -100,6 +104,14 @@ func _physics_process(delta):
 			velocity = Vector2.ZERO
 
 	move_and_slide()
+	
+func say(message: String):
+	chat_label.text = message
+	chat_timer.start()
+	
+func _on_chat_timer_timeout():
+	chat_label.text = ""
+	
 
 func _process(delta):
 	var anim: String = "walk_"
