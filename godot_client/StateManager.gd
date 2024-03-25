@@ -34,7 +34,9 @@ func state_play(p_type: String, p_data: Dictionary):
 	var from_pid: String = Marshalls.raw_to_base64(p_data["from_pid"])
 	
 	if p_type == "Chat":
-		UI.textbox.append_text("%s says: %s\n" % [from_pid, p_data["message"]])
+		if _pids_actors.has(from_pid):
+			var actor_chatting: CharacterBody2D = _pids_actors[from_pid]
+			UI.textbox.append_text("%s says: %s\n" % [actor_chatting.actor_name, p_data["message"]])
 		
 	if p_type == "Hello":
 		var actor_data: Dictionary = p_data["state_view"]
@@ -55,7 +57,7 @@ func state_play(p_type: String, p_data: Dictionary):
 	if p_type == "Disconnect":
 		if _pids_actors.has(from_pid):
 			var actor_disconnected: CharacterBody2D = _pids_actors[from_pid]
-			UI.textbox.append_text("%s has disconnected due to %s" % [from_pid, p_data["reason"]])
+			UI.textbox.append_text("%s has disconnected due to %s" % [actor_disconnected.actor_name, p_data["reason"]])
 			actor_disconnected.queue_free()
 		
 func do_login(username: String, password: String):
