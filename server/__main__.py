@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Start the server")
     parser.add_argument("--hostname", type=str, default="localhost", help="Hostname to bind to")
-    parser.add_argument("--port", type=int, default=8081, help="Port to bind to")
+    parser.add_argument("--port", type=int, default=9091, help="Port to bind to")
     args = parser.parse_args()
 
     try:

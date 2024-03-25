@@ -6,7 +6,7 @@ static var EVERYONE: String = "AAAAAAAAAAAAAAAAAAAAAA=="
 var socket := WebSocketPeer.new()
 
 @export var hostname: String = "localhost"
-@export var port: int = 8081
+@export var port: int = 9091
 
 func _ready() -> void:
 	#var cert: X509Certificate = X509Certificate.new()
