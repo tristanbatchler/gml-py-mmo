@@ -12,20 +12,37 @@ signal network_move(pid: String, dx: int, dy: int)
 
 @onready var animation_player := $Sprite2D/AnimationPlayer
 @onready var nameplate := $Label
+@onready var sprite := $Sprite2D
 
 var pid: String
 var is_player
 var actor_name: String
 var next_pos: Vector2
+var image_index: int
 
 func _ready():
 	nameplate.text = actor_name
+	
+	var tex: Texture2D
+	match image_index:
+		0:
+			tex = preload("res://spritesheets/monk.png")
+		1:
+			tex = preload("res://spritesheets/rat.png")
+		2: 
+			tex = preload("res://spritesheets/oldwoman.png")
+		3: 
+			tex = preload("res://spritesheets/draconian.png")
+		_:
+			tex = preload("res://spritesheets/default.png")
+	
 
-func init(_pid: String, _position: Vector2, _name: String, _is_player: bool):
+func init(_pid: String, _position: Vector2, _name: String, _image_index: int, _is_player: bool):
 	pid = _pid
 	next_pos = _position
 	position = next_pos
 	actor_name = _name
+	image_index = _image_index
 	is_player = _is_player
 	return self
 	

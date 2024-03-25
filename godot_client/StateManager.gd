@@ -43,8 +43,9 @@ func state_play(p_type: String, p_data: Dictionary):
 		var x: int = actor_data["x"]
 		var y: int = actor_data["y"]
 		var name: String = actor_data["name"]
+		var image_index: int = actor_data["image_index"]
 		
-		var new_actor: CharacterBody2D = ActorScene.instantiate().init(_pid, Vector2(x, y), name, from_pid == _pid)
+		var new_actor: CharacterBody2D = ActorScene.instantiate().init(_pid, Vector2(x, y), name, image_index, from_pid == _pid)
 		_pids_actors[from_pid] = new_actor
 		add_sibling(new_actor)
 		
@@ -96,6 +97,8 @@ func do_logout():
 			"reason": "User logged out"
 		}
 	})
+	for actor in _pids_actors.values():
+		actor.queue_free()
 		
 func process_command(command: String, args: Array[String]):
 	if command == "login":

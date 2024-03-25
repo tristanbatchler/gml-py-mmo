@@ -1,7 +1,7 @@
 [gd_scene load_steps=17 format=3 uid="uid://ii16i5jbj1hs"]
 
 [ext_resource type="Script" path="res://actor.gd" id="1_7oapk"]
-[ext_resource type="Texture2D" uid="uid://cikicv47kl4uc" path="res://spritesheet.png" id="2_83cge"]
+[ext_resource type="Texture2D" uid="uid://df14c4t7ued2l" path="res://spritesheets/oldwoman.png" id="2_0v3o6"]
 [ext_resource type="FontFile" uid="uid://80bd0v6adi1y" path="res://Kenney Pixel.ttf" id="3_de3ol"]
 
 [sub_resource type="Animation" id="Animation_nu7x0"]
@@ -190,7 +190,7 @@ Label/styles/normal = SubResource("StyleBoxEmpty_rvyvd")
 script = ExtResource("1_7oapk")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_83cge")
+texture = ExtResource("2_0v3o6")
 hframes = 9
 vframes = 4
 region_enabled = true
