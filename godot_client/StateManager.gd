@@ -8,25 +8,28 @@ const ActorScene: PackedScene = preload("res://actor.tscn")
 
 func state_entry(p_type: String, p_data: Dictionary):
 	if p_type == "Motd":
-		UI.textbox.append_text(p_data["message"] + "\n")
+		UI.add_to_log(p_data["message"])
+		UI.add_to_log("Start by registering with '/register username password'");
+		UI.add_to_log("Then you can login with '/login username password'");
+		UI.add_to_log("Once you're in the game, you can chat freely or logout with '/logout'");
+		UI.add_to_log("You can view this message again any time with '/help'");
 		
 	if p_type == "Pid":
 		_pid = Marshalls.raw_to_base64(p_data["from_pid"])
-		UI.textbox.append_text(_pid + "\n")
 		
 func state_login(p_type: String, p_data: Dictionary):	
 	if p_type == "Ok":
-		UI.textbox.append_text("Login succeeded!\n")
+		UI.add_to_log("Login succeeded!", UI.GREEN)
 		_state = state_play
 	elif p_type == "Deny":
-		UI.textbox.append_text("Login failed... %s\n" % p_data["reason"])
+		UI.add_to_log("Login failed... %s" % p_data["reason"], UI.YELLOW)
 		_state = state_entry
 		
 func state_register(p_type: String, p_data: Dictionary):
 	if p_type == "Ok":
-		UI.textbox.append_text("Registration succeeded! Now login with your new credentials.\n")
+		UI.add_to_log("Registration succeeded! Now login with your new credentials.")
 	elif p_type == "Deny":
-		UI.textbox.append_text("Registration failed... %s\n" % p_data["reason"])
+		UI.add_to_log("Registration failed... %s" % p_data["reason"], UI.YELLOW)
 	
 	_state = state_entry
 	
@@ -36,7 +39,7 @@ func state_play(p_type: String, p_data: Dictionary):
 	if p_type == "Chat":
 		if _pids_actors.has(from_pid):
 			var actor_chatting: CharacterBody2D = _pids_actors[from_pid]
-			UI.textbox.append_text("%s says: %s\n" % [actor_chatting.actor_name, p_data["message"]])
+			UI.add_to_log("%s says: %s" % [actor_chatting.actor_name, p_data["message"]], UI.GREEN if from_pid == _pid else UI.BLUE)
 		
 	if p_type == "Hello":
 		var actor_data: Dictionary = p_data["state_view"]
@@ -58,12 +61,12 @@ func state_play(p_type: String, p_data: Dictionary):
 	if p_type == "Disconnect":
 		if _pids_actors.has(from_pid):
 			var actor_disconnected: CharacterBody2D = _pids_actors[from_pid]
-			UI.textbox.append_text("%s has disconnected due to %s" % [actor_disconnected.actor_name, p_data["reason"]])
+			UI.add_to_log("%s has disconnected due to %s" % [actor_disconnected.actor_name, p_data["reason"]])
 			actor_disconnected.queue_free()
 		
 func do_login(username: String, password: String):
 	if _state != state_entry:
-		UI.textbox.append_text("You can't login here\n")
+		UI.add_to_log("You can't login here", UI.YELLOW)
 		return
 	_state = state_login
 	NetworkClient.send_packet({
@@ -76,7 +79,7 @@ func do_login(username: String, password: String):
 	
 func do_register(username: String, password: String):
 	if _state != state_entry:
-		UI.textbox.append_text("You can't register here\n")
+		UI.add_to_log("You can't register here", UI.YELLOW)
 		return
 	_state = state_register
 	NetworkClient.send_packet({
@@ -89,7 +92,7 @@ func do_register(username: String, password: String):
 	
 func do_logout():
 	if _state != state_play:
-		UI.textbox.append_text("You can't logout here\n")
+		UI.add_to_log("You can't logout here", UI.YELLOW)
 	_state = state_entry
 	NetworkClient.send_packet({
 		"disconnect": {
@@ -108,17 +111,17 @@ func process_command(command: String, args: Array[String]):
 	elif command == "logout":
 		do_logout()
 	else:
-		UI.textbox.append_text("Command '%s' not found\n" % command)
+		UI.add_to_log("Command '%s' not found" % command, UI.YELLOW)
 
 func _on_network_client_connected():
-	UI.textbox.append_text("Connection with the server established\n")
+	UI.add_to_log("Connection with the server established", UI.GREEN)
 
 func _on_network_client_disconnected(code, reason):
-	UI.textbox.append_text("Client disconnected from server with code %s and reason %s\n" % [code, reason])
+	UI.add_to_log("Client disconnected from server with code %s and reason %s" % [code, reason], UI.BLUE)
 	get_tree().quit()
 
 func _on_network_client_error(code):
-	UI.textbox.append_text("Network error with code %s\n" % code)
+	UI.add_to_log("Network error with code %s" % code, UI.YELLOW)
 	get_tree().quit()
 
 func _on_network_client_received(packet: Dictionary):
