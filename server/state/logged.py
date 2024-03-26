@@ -29,14 +29,13 @@ class LoggedState(BaseState):
         self._image_index: int = 0
     
     async def _on_transition(self, previous_state_view: BaseState.View | None = None) -> None:
-        assert isinstance(previous_state_view, EntryState.View)
-        if previous_state_view.username:
+        if previous_state_view and previous_state_view.username:
             self._name = previous_state_view.username
 
             # Broadcast our username to everyone, just in case a new connection is listening for it to build its list of logged in users (hence avoiding double logins)
             await self._queue_local_protos_send(MyUsernamePacket(from_pid=self._pid, to_pid=EVERYONE, exclude_sender=True, username=self._name))
         else:
-            raise TransitionError("LoggedState requires a username but EntryState did not have one")
+            raise TransitionError(f"LoggedState requires a username but {previous_state_view.__class__.__name__} provided none")
         
         async with self._get_db_session() as session:
             user: User = (await session.execute(select(User).where(User.username == self._name))).scalar_one_or_none()

@@ -3,7 +3,7 @@ import logging
 import traceback
 import argparse
 from netbound.app import ServerApp
-from server.state import EntryState
+from server.state import EntryState, BobPlayState
 from server import packet
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from ssl import SSLContext, PROTOCOL_TLS_SERVER
@@ -34,6 +34,8 @@ async def main(hostname: str, port: int) -> None:
     server_app: ServerApp = ServerApp(hostname, port, db_engine, ssl_context=ssl_context)
 
     server_app.register_packets(packet)
+
+    await server_app.add_npc(BobPlayState)
 
     async with asyncio.TaskGroup() as tg:
         tg.create_task(server_app.start(initial_state=EntryState))

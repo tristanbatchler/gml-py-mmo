@@ -91,7 +91,7 @@ class EntryState(BaseState):
 
             room_width: int = 320
             room_height: int = 240
-            grid_size: int = 16
+            grid_size: int = 32
             random_x: int = grid_size * randint(1, room_width // grid_size - 1)
             random_y: int = grid_size * randint(1, room_height // grid_size - 1)
             instanced_entity: InstancedEntity = InstancedEntity(entity_id=entity.id, x=random_x, y=random_y)

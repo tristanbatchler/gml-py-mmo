@@ -38,6 +38,9 @@ client/options/operagx
 client/options/windows
 client/options/tvos
 
+# Engine
+netbound/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
