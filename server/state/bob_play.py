@@ -37,10 +37,11 @@ class BobPlayState(LoggedState):
                 dx = -dx
             if self._y + dy < 0 or self._y + dy >= 224:
                 dy = -dy
-
-            await self._queue_local_protos_send(MovePacket(from_pid=self._pid, to_pid=EVERYONE, dx=dx, dy=dy))
             self._x += dx
             self._y += dy
+
+            if len(self._known_others) > 0:
+                await self._queue_local_protos_send(MovePacket(from_pid=self._pid, to_pid=self._known_others.keys(), dx=dx, dy=dy))
 
         # Schedule the next move, so Bob is always moving around
         next_move_timer: float = uniform(0, 2.5)
