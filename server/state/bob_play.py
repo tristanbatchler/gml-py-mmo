@@ -1,10 +1,10 @@
 from __future__ import annotations
+from netbound import schedule
 from netbound.state import BaseState
 from server.packet import ChatPacket, DisconnectPacket, HelloPacket, MovePacket, MyUsernamePacket, WhichUsernamesPacket
 from netbound.constants import EVERYONE
 from server.state import LoggedState
-from random import randint
-from asyncio import sleep
+from random import randint, uniform, choice
 
 class BobPlayState(LoggedState):
     def __init__(self, *args, **kwargs) -> None:
@@ -18,31 +18,33 @@ class BobPlayState(LoggedState):
         self._image_index = 3
         await self._queue_local_protos_send(HelloPacket(from_pid=self._pid, to_pid=EVERYONE, exclude_sender=True, state_view=self.view_dict))
         self._logger.info(f"Bob spawned at ({self._x}, {self._y})")
+        await self._random_move()
 
-    async def _tick(self) -> None:
-        # Only 10% chance of moving
-        if randint(0, 9):
-            return
+    async def _random_move(self) -> None:
+        # Only a chance of moving
+        if not randint(0, 3):
+            dx: int = choice((-1, 1)) * 32
+            dy: int = choice((-1, 1)) * 32
 
-        dx: int = randint(-1, 1) * 32
-        dy: int = randint(-1, 1) * 32
+            if dy and dx:
+                # Only move in one direction at a time
+                if randint(0, 1):
+                    dx = 0
+                else:
+                    dy = 0
+            
+            if self._x + dx < 0 or self._x + dx >= 320:
+                dx = -dx
+            if self._y + dy < 0 or self._y + dy >= 224:
+                dy = -dy
 
-        if dy and dx:
-            # Only move in one direction at a time
-            if randint(0, 1):
-                dx = 0
-            else:
-                dy = 0
-        
-        if self._x + dx < 0 or self._x + dx >= 320:
-            dx = 0
-        if self._y + dy < 0 or self._y + dy >= 224:
-            dy = 0
-
-        if dx or dy:
             await self._queue_local_protos_send(MovePacket(from_pid=self._pid, to_pid=EVERYONE, dx=dx, dy=dy))
             self._x += dx
             self._y += dy
+
+        # Schedule the next move, so Bob is always moving around
+        next_move_timer: float = uniform(0, 2.5)
+        schedule(next_move_timer, self._random_move)
 
 
     async def handle_chat(self, p: ChatPacket) -> None:
@@ -50,7 +52,7 @@ class BobPlayState(LoggedState):
             sender_view: BaseState.View = self._known_others[p.from_pid]
             if sender_view.name:
                 reply: str = f"Hi {sender_view.name}! I'm Bob!"
-                await self._queue_local_protos_send(ChatPacket(from_pid=self._pid, to_pid=p.to_pid, exclude_sender=True, message=reply))
+                schedule(1, lambda: self._queue_local_protos_send(ChatPacket(from_pid=self._pid, to_pid=EVERYONE, exclude_sender=True, message=reply)))
 
     async def handle_disconnect(self, p: DisconnectPacket) -> None:
         if p.from_pid in self._known_others:
